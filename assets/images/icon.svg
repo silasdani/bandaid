@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="120" fill="#2563eb" />
+  <g>
+    <circle cx="180" cy="370" r="50" fill="#fff" />
+    <rect x="220" y="120" width="40" height="200" rx="20" fill="#fff" />
+    <ellipse cx="240" cy="140" rx="60" ry="30" fill="#fff" />
+    <text x="270" y="400" font-family="Arial, Helvetica, sans-serif" font-size="64" fill="#fff"
+      font-weight="bold">Band</text>
+    <text x="270" y="460" font-family="Arial, Helvetica, sans-serif" font-size="48" fill="#fff">Cue</text>
+  </g>
+</svg> 
