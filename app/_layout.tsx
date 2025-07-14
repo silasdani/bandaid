@@ -1,29 +1,52 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import Colors from "../constants/Colors";
+import { SessionProvider, useSession } from "../context/SessionContext";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+function AutoRedirector() {
+  const { role, sessionId, isSessionLoaded } = useSession();
+  const router = useRouter();
+  const [checkedRedirect, setCheckedRedirect] = useState(false);
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  useEffect(() => {
+    if (!isSessionLoaded) return;
+    if (!checkedRedirect) {
+      if (sessionId && role) {
+        if (role === "lead") {
+          router.replace("/lead");
+        } else if (role === "band") {
+          router.replace("/band");
+        }
+        setCheckedRedirect(true);
+      } else {
+        setCheckedRedirect(true);
+      }
+    }
+  }, [sessionId, role, checkedRedirect, isSessionLoaded]);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
+  if (!isSessionLoaded || !checkedRedirect) {
     return null;
   }
+  return null;
+}
 
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+    <SessionProvider>
+      <AutoRedirector />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.light.systemBackground },
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="start" />
+        <Stack.Screen name="lead" />
+        <Stack.Screen name="band" />
       </Stack>
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </SessionProvider>
   );
 }

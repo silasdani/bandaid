@@ -3,20 +3,25 @@
     "name": "band-cue",
     "slug": "band-cue",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "bandcue",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "ro.albini.bandcue",
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "package": "ro.albini.bandcue",
+        "versionCode": 1
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "ro.albini.bandcue"
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +38,29 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "FIREBASE_API_KEY": "AIzaSyDFDpkoMFqDX2DDvgM9m74wLlHglj0aVSY",
+      "FIREBASE_AUTH_DOMAIN": "band-cue.firebaseapp.com",
+      "FIREBASE_DATABASE_URL": "https://band-cue-default-rtdb.europe-west1.firebasedatabase.app",
+      "FIREBASE_PROJECT_ID": "band-cue",
+      "FIREBASE_STORAGE_BUCKET": "band-cue.firebasestorage.app",
+      "FIREBASE_MESSAGING_SENDER_ID": "1:732037131504:web:c4ae223c645728e7a8a635",
+      "FIREBASE_APP_ID": "G-XE2E7F6SCM",
+      "router": {},
+      "eas": {
+        "projectId": "cbf2f032-07ea-49ae-a98c-fd698925544d"
+      }
     }
   }
 }
