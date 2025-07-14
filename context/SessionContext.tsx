@@ -149,7 +149,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   }, [currentCue]);
 
   useEffect(() => {
-    if (role === "band" && currentSession && !unsubscribeListener) {
+    if (role === "band" && currentSession) {
       console.log("Setting up listener for band member in session:", currentSession.id);
       const unsubscribe = firebaseService.listenToCues(currentSession.id, (cueData) => {
         console.log("Received cue data for band member:", cueData);
@@ -158,8 +158,11 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
         }
       });
       setUnsubscribeListener(() => unsubscribe);
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     }
-  }, [role, currentSession, unsubscribeListener]);
+  }, [role, currentSession]);
 
   useEffect(() => {
     if (currentSession && !unsubscribeMembersListener) {

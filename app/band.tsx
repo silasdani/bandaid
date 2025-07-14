@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -26,6 +26,27 @@ const BAND_CUE_COLORS: Record<string, string> = {
 
 export default function BandScreen() {
   const { currentSession, currentCue, leaveSession } = useSession();
+  const [visibleCue, setVisibleCue] = useState(currentCue);
+
+  useEffect(() => {
+    if (currentCue && currentCue.text) {
+      setVisibleCue(currentCue);
+      const duration = currentCue.duration ?? 6000;
+      const timer = setTimeout(() => {
+        setVisibleCue(null);
+      }, duration);
+      return () => clearTimeout(timer);
+    } else {
+      setVisibleCue(null);
+    }
+  }, [currentCue]);
+
+  // Redirect to start if session is closed
+  useEffect(() => {
+    if (currentSession && currentSession.active === false) {
+      router.replace('/start');
+    }
+  }, [currentSession]);
 
   const handleLeaveSession = async () => {
     Alert.alert("Gestionare Sesiune", "Ce dorești să faci?", [
@@ -60,7 +81,7 @@ export default function BandScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
         <StatusBar barStyle="light-content" backgroundColor="#000" />
         {/* Compact Header */}
-        <View style={[styles.header, { backgroundColor: "#000", borderBottomColor: "#222", borderBottomWidth: 1 }]}>
+        <View style={[styles.header, { backgroundColor: "#000", borderBottomColor: "#222", borderBottomWidth: 1 }]}> 
           <View style={styles.headerContent}>
             <View style={styles.sessionInfo}>
               <Text style={[styles.sessionCode, { color: "#fff" }]}>{currentSession.id}</Text>
@@ -77,7 +98,7 @@ export default function BandScreen() {
           </View>
         </View>
         <View style={styles.cueContainer}>
-          <Text style={[styles.cueText, { color: currentCue && BAND_CUE_COLORS[currentCue.text] ? BAND_CUE_COLORS[currentCue.text] : "#fff" }]}>{currentCue?.text || ""}</Text>
+          <Text style={[styles.cueText, { color: visibleCue && BAND_CUE_COLORS[visibleCue.text] ? BAND_CUE_COLORS[visibleCue.text] : "#fff" }]}>{visibleCue?.text || ""}</Text>
         </View>
       </SafeAreaView>
     </View>

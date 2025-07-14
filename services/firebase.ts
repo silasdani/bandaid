@@ -84,6 +84,7 @@ export const firebaseService = {
         role: "band",
         joinedAt: Date.now(),
         lastSeen: Date.now(),
+        token: "albini12345!",
       });
 
       // Update member count
@@ -104,6 +105,7 @@ export const firebaseService = {
       const cueData = {
         ...cue,
         timestamp: Date.now(),
+        token: "albini12345!",
       };
       await set(cueRef, cueData);
       console.log("Cue sent to Firebase:", sessionId, cueData);
@@ -148,7 +150,9 @@ export const firebaseService = {
     try {
       // Remove member from session
       const memberRef = ref(database, `sessions/${sessionId}/members/${userId}`);
-      await set(memberRef, null);
+      await set(memberRef, {
+        token: "albini12345!",
+      });
 
       // Update member count
       const sessionRef = ref(database, `sessions/${sessionId}`);
@@ -165,6 +169,7 @@ export const firebaseService = {
             ...sessionData,
             active: false,
             endedAt: Date.now(),
+            token: "albini12345!",
           });
         }
       }
@@ -181,6 +186,7 @@ export const firebaseService = {
       await set(sessionRef, {
         active: false,
         endedAt: Date.now(),
+        token: "albini12345!",
       });
       console.log("Session ended in Firebase:", sessionId);
     } catch (error) {
@@ -192,7 +198,10 @@ export const firebaseService = {
   updateMemberLastSeen: async (sessionId: string, userId: string) => {
     try {
       const memberRef = ref(database, `sessions/${sessionId}/members/${userId}/lastSeen`);
-      await set(memberRef, Date.now());
+      await set(memberRef, {
+        lastSeen: Date.now(),
+        token: "albini12345!",
+      });
     } catch (error) {
       console.error("Error updating member last seen:", error);
     }

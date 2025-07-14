@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Colors from "../constants/Colors";
 import { useSession } from "../context/SessionContext";
 
@@ -67,40 +67,48 @@ export default function StartScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={styles.inner}>
-        {sessionId && (
-          <TouchableOpacity style={styles.continueButton} onPress={handleContinueSession}>
-            <Text style={styles.continueButtonText}>Continuă sesiunea</Text>
-          </TouchableOpacity>
-        )}
-        <Text style={styles.title}>Band Cue</Text>
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={handleCreateSession} disabled={isLoading}>
-            <Text style={styles.mainButtonText}>{isLoading ? "Se creează..." : "Creează Sesiune"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={() => setShowJoinInput((v) => !v)} disabled={isLoading}>
-            <Text style={styles.mainButtonText}>Conectează-te la Sesiune</Text>
-          </TouchableOpacity>
-        </View>
-        {showJoinInput && (
-          <View style={styles.joinSection}>
-            <TextInput
-              style={styles.input}
-              placeholder="Cod sesiune"
-              placeholderTextColor={Colors.light.gray[400]}
-              value={sessionIdInput}
-              onChangeText={setSessionIdInput}
-              autoCapitalize="characters"
-              maxLength={6}
-              editable={!isLoading}
-              textAlign="center"
-            />
-            <TouchableOpacity style={[styles.joinButton, isLoading && styles.disabledButton]} onPress={handleJoinSession} disabled={isLoading}>
-              <Text style={styles.joinButtonText}>{isLoading ? "Se conectează..." : "Conectare"}</Text>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.inner}>
+          {sessionId && role && (
+            <TouchableOpacity style={styles.continueButton} onPress={handleContinueSession}>
+              <Text style={styles.continueButtonText}>Continuă sesiunea</Text>
+            </TouchableOpacity>
+          )}
+          <Text style={styles.title}>Band Cue</Text>
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={handleCreateSession} disabled={isLoading}>
+              <Text style={styles.mainButtonText}>{isLoading ? "Se creează..." : "Creează Sesiune"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={() => setShowJoinInput((v) => !v)} disabled={isLoading}>
+              <Text style={styles.mainButtonText}>Conectează-te la Sesiune</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </View>
+          {showJoinInput && (
+            <View style={styles.joinSection}>
+              <TextInput
+                style={styles.input}
+                placeholder="Cod sesiune"
+                placeholderTextColor={Colors.light.gray[400]}
+                value={sessionIdInput}
+                onChangeText={setSessionIdInput}
+                autoCapitalize="characters"
+                maxLength={6}
+                editable={!isLoading}
+                textAlign="center"
+              />
+              <TouchableOpacity style={[styles.joinButton, isLoading && styles.disabledButton]} onPress={handleJoinSession} disabled={isLoading}>
+                <Text style={styles.joinButtonText}>{isLoading ? "Se conectează..." : "Conectare"}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {/* Extra space at the end for Android and keyboard */}
+          <View style={{ height: 48 }} />
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

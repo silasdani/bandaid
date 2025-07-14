@@ -1,4 +1,4 @@
-import { Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import { Alert, Animated, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import Colors from "../constants/Colors";
@@ -8,16 +8,14 @@ import { firebaseService } from "../services/firebase";
 // No longer need CUE_COLORS or type
 
 export default function LeadScreen() {
+  // All hooks at the top
   const { currentSession, sendCue, leaveSession, clearCue } = useSession();
   const [sendingCue, setSendingCue] = useState<string | null>(null);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [headerColor, setHeaderColor] = useState<string>("#000");
   const headerColorTimeout = useRef<number | null>(null);
-
-  if (!currentSession) {
-    return <Redirect href="/start" />;
-  }
-
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   // Remove color from predefinedCues and use getCueColor for text color
   const predefinedCues: { text: string; color: string; duration: number }[] = [
@@ -54,7 +52,7 @@ export default function LeadScreen() {
     ]).start();
 
     try {
-      await sendCue({ text: cue.text === "—" ? "" : cue.text, type: "CUSTOM" });
+      await sendCue({ text: cue.text === "—" ? "" : cue.text });
 
       // Show sending state for a short time
       setTimeout(() => {
@@ -94,6 +92,7 @@ export default function LeadScreen() {
     ]);
   };
 
+  // Fallback render if no currentSession
   if (!currentSession) {
     return (
       <SafeAreaView style={styles.container}>
@@ -123,9 +122,6 @@ export default function LeadScreen() {
   const cuesToShow: ({ text: string; color: string; duration: number; timestamp: number } | undefined)[] = cuesWithDash.slice(0, totalCells);
   while (cuesToShow.length < totalCells) cuesToShow.push(undefined);
 
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-
   // Responsive grid: 2x4 portrait, 4x2 landscape
   const numRows = isLandscape ? 2 : 4;
   const numCols = isLandscape ? 4 : 2;
@@ -133,7 +129,7 @@ export default function LeadScreen() {
   const handleSendCueOrClear = async (cue: { text: string; color: string }, duration: number) => {
     if (cue.text === "—") {
       clearCue();
-      await sendCue({ text: "", type: "CUSTOM" });
+      await sendCue({ text: "" });
       return;
     }
     await handleSendCue(cue, duration);
