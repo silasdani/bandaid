@@ -204,3 +204,4 @@ Pentru întrebări sau probleme:
 ---
 
 **Band Cue** - Sincronizare perfectă pentru trupe 🎵
+# bandaid
