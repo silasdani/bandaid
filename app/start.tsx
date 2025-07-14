@@ -1,33 +1,16 @@
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Colors from "../constants/Colors";
 import { useSession } from "../context/SessionContext";
 
 export default function StartScreen() {
-  const { createSession, joinSession, logout } = useSession();
+  const { createSession, joinSession } = useSession();
   const [sessionIdInput, setSessionIdInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<"lead" | "band" | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showJoinInput, setShowJoinInput] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-    setRole(null);
-    setSessionId(null);
-    setSessionIdInput("");
-    Alert.alert("Deconectat", "Ai fost deconectat cu succes.");
-  };
 
   const handleCreateSession = async () => {
     setIsLoading(true);
@@ -35,10 +18,6 @@ export default function StartScreen() {
       setRole("lead");
       const newSessionId = await createSession();
       setSessionId(newSessionId);
-      Alert.alert(
-        "Sesiune creată",
-        `Codul sesiunii: ${newSessionId}\n\nDistribuie acest cod membrilor trupei pentru a se conecta.`,
-      );
     } catch (error) {
       Alert.alert("Eroare", "Nu s-a putut crea sesiunea. Verifică conexiunea la internet.");
     } finally {
@@ -76,7 +55,6 @@ export default function StartScreen() {
     }
   };
 
-  // Auto-redirect if sessionId and role are present
   useEffect(() => {
     if (sessionId && role) {
       if (role === "lead") {
@@ -90,7 +68,6 @@ export default function StartScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.inner}>
-        {/* Continue existing session */}
         {sessionId && (
           <TouchableOpacity style={styles.continueButton} onPress={handleContinueSession}>
             <Text style={styles.continueButtonText}>Continuă sesiunea</Text>
@@ -98,18 +75,10 @@ export default function StartScreen() {
         )}
         <Text style={styles.title}>Band Cue</Text>
         <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            style={[styles.mainButton, isLoading && styles.disabledButton]}
-            onPress={handleCreateSession}
-            disabled={isLoading}
-          >
+          <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={handleCreateSession} disabled={isLoading}>
             <Text style={styles.mainButtonText}>{isLoading ? "Se creează..." : "Creează Sesiune"}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.mainButton, isLoading && styles.disabledButton]}
-            onPress={() => setShowJoinInput((v) => !v)}
-            disabled={isLoading}
-          >
+          <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={() => setShowJoinInput((v) => !v)} disabled={isLoading}>
             <Text style={styles.mainButtonText}>Conectează-te la Sesiune</Text>
           </TouchableOpacity>
         </View>
@@ -126,20 +95,11 @@ export default function StartScreen() {
               editable={!isLoading}
               textAlign="center"
             />
-            <TouchableOpacity
-              style={[styles.joinButton, isLoading && styles.disabledButton]}
-              onPress={handleJoinSession}
-              disabled={isLoading}
-            >
+            <TouchableOpacity style={[styles.joinButton, isLoading && styles.disabledButton]} onPress={handleJoinSession} disabled={isLoading}>
               <Text style={styles.joinButtonText}>{isLoading ? "Se conectează..." : "Conectare"}</Text>
             </TouchableOpacity>
           </View>
         )}
-      </View>
-      <View style={styles.logoutContainer}>
-        <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logoutText}>Deconectare</Text>
-        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );

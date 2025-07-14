@@ -4,9 +4,8 @@ import { firebaseService, LeadAction } from "../services/firebase";
 
 export interface Cue {
   text: string;
-  type: "STROFA" | "REFREN" | "BRIDGE" | "FINAL" | "CUSTOM";
   timestamp: number;
-  duration?: number; // Duration in milliseconds
+  duration?: number;
 }
 
 export interface SessionMember {
@@ -57,8 +56,6 @@ interface SessionProviderProps {
   children: ReactNode;
 }
 
-// Generate a static userId for the session (for demo, random per app load)
-// const staticUserId = Math.random().toString(36).substr(2, 8);
 const USER_ID_KEY = "bandcue_user_id";
 const SESSION_ID_KEY = "bandcue_session_id";
 const ROLE_KEY = "bandcue_role";
@@ -77,7 +74,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   const [unsubscribeLeadActionsListener, setUnsubscribeLeadActionsListener] = useState<(() => void) | null>(null);
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
 
-  // On mount, load or generate userId and restore session if possible
   useEffect(() => {
     const loadOrCreateUserIdAndSession = async () => {
       try {
@@ -92,7 +88,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
           if (storedSessionId && storedRole) {
             setSessionId(storedSessionId);
             setRole(storedRole as "lead" | "band");
-            // Fetch session data from Firebase and set currentSession
             try {
               const sessionData = await firebaseService.getSession(storedSessionId);
               console.log('[SessionContext] Firebase sessionData:', sessionData);
@@ -136,7 +131,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     loadOrCreateUserIdAndSession();
   }, []);
 
-  // Persist sessionId and role when they change
   useEffect(() => {
     if (sessionId && role) {
       AsyncStorage.setItem(SESSION_ID_KEY, sessionId);
@@ -154,7 +148,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   }, [currentCue]);
 
-  // Set up listener when role changes to 'band'
   useEffect(() => {
     if (role === "band" && currentSession && !unsubscribeListener) {
       console.log("Setting up listener for band member in session:", currentSession.id);
@@ -168,7 +161,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   }, [role, currentSession, unsubscribeListener]);
 
-  // Set up listener for session members
   useEffect(() => {
     if (currentSession && !unsubscribeMembersListener) {
       console.log("Setting up members listener for session:", currentSession.id);
@@ -180,7 +172,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   }, [currentSession, unsubscribeMembersListener]);
 
-  // Set up listener for lead actions (for band members)
   useEffect(() => {
     if (currentSession && role === "band" && !unsubscribeLeadActionsListener) {
       console.log("Setting up lead actions listener for session:", currentSession.id);
@@ -194,7 +185,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
 
 
 
-  // Helper to ensure userId exists
   const ensureUserId = async (): Promise<string> => {
     let id = userId;
     if (!id) {
@@ -240,7 +230,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
         setSessionId(sessionId);
         await AsyncStorage.setItem(SESSION_ID_KEY, sessionId);
         await AsyncStorage.setItem(ROLE_KEY, "band");
-        // Fetch the full session data after join
         try {
           const sessionData = await firebaseService.getSession(sessionId);
           console.log('[SessionContext] joinSession fetched sessionData:', sessionData);
@@ -274,7 +263,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     const cueWithTimestamp: Cue = {
       ...cue,
       timestamp: Date.now(),
-      duration: getCueDuration(cue.type), // Add duration based on cue type
     };
 
     try {
@@ -292,6 +280,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     const actionWithTimestamp: LeadAction = {
       ...action,
       timestamp: Date.now(),
+      type: "SCROLL"
     };
 
     try {
@@ -304,7 +293,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
   };
 
   const leaveSession = async () => {
-    if (currentSession) {
+    if (currentSession && userId) {
       try {
         await firebaseService.leaveSession(currentSession.id, userId);
         setCurrentSession(null);
@@ -318,7 +307,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (unsubscribeListener) {
@@ -333,23 +321,6 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     };
   }, [unsubscribeListener, unsubscribeMembersListener, unsubscribeLeadActionsListener]);
 
-  // Helper function to determine cue duration based on type
-  const getCueDuration = (type: Cue["type"]): number => {
-    switch (type) {
-      case "STROFA":
-        return 6000; // 10 seconds
-      case "REFREN":
-        return 6000; // 15 seconds
-      case "BRIDGE":
-        return 6000; // 8 seconds
-      case "FINAL":
-        return 6000; // 20 seconds
-      case "CUSTOM":
-        return 6000; // 12 seconds
-      default:
-        return 6000; // 10 seconds default
-    }
-  };
 
   const clearCue = () => {
     setCurrentCue(null);
