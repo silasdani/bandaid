@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Colors from "../constants/Colors";
 import { useSession } from "../context/SessionContext";
+import { useSettings } from "../context/SettingsContext";
 
 export default function StartScreen() {
   const { createSession, joinSession } = useSession();
+  const { settings } = useSettings();
   const [sessionIdInput, setSessionIdInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<"lead" | "band" | null>(null);
@@ -73,6 +75,14 @@ export default function StartScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.inner}>
+          {/* Settings Button */}
+          <TouchableOpacity 
+            style={styles.settingsButton} 
+            onPress={() => router.push('/settings')}
+          >
+            <Text style={styles.settingsButtonText}>⚙️</Text>
+          </TouchableOpacity>
+          
           {sessionId && role && (
             <TouchableOpacity style={styles.continueButton} onPress={handleContinueSession}>
               <Text style={styles.continueButtonText}>Continuă sesiunea</Text>
@@ -125,6 +135,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 24,
+    position: "relative",
+  },
+  settingsButton: {
+    position: "absolute",
+    top: 60,
+    right: 24,
+    padding: 8,
+    zIndex: 1,
+  },
+  settingsButtonText: {
+    fontSize: 24,
+    color: "#fff",
   },
   title: {
     fontSize: 40,

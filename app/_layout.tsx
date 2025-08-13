@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import Colors from "../constants/Colors";
 import { SessionProvider, useSession } from "../context/SessionContext";
+import { SettingsProvider } from "../context/SettingsContext";
 
 function AutoRedirector() {
   const { role, sessionId, isSessionLoaded } = useSession();
@@ -33,20 +34,23 @@ function AutoRedirector() {
 
 export default function RootLayout() {
   return (
-    <SessionProvider>
-      <AutoRedirector />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Colors.light.systemBackground },
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="start" />
-        <Stack.Screen name="lead" />
-        <Stack.Screen name="band" />
-      </Stack>
-      <StatusBar style="auto" />
-    </SessionProvider>
+    <SettingsProvider>
+      <SessionProvider>
+        <AutoRedirector />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: Colors.light.systemBackground },
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="start" />
+          <Stack.Screen name="lead" />
+          <Stack.Screen name="band" />
+          <Stack.Screen name="settings" />
+        </Stack>
+        <StatusBar style="auto" />
+      </SessionProvider>
+    </SettingsProvider>
   );
 }

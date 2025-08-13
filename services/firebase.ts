@@ -2,7 +2,6 @@ import Constants from "expo-constants";
 import { initializeApp } from "firebase/app";
 import { get, getDatabase, off, onValue, push, ref, set } from "firebase/database";
 
-// Interfaces for real-time actions and PDFs
 export interface LeadAction {
   type: "SCROLL" | "TAP" | "ZOOM" | "HIGHLIGHT" | "ANNOTATE" | "PAGE_CHANGE" | "PDF_UPLOAD" | "PDF_SELECT";
   x?: number;

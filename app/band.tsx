@@ -1,31 +1,31 @@
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    Dimensions,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Colors from "../constants/Colors";
 import { useSession } from "../context/SessionContext";
+import { useSettings } from "../context/SettingsContext";
 
 const { width, height } = Dimensions.get("window");
 
-// Add cue color mapping for band screen
-const BAND_CUE_COLORS: Record<string, string> = {
-  "Pauză Instrumental": Colors.light.warning,
-  "X2 Ref": Colors.light.error,
-  "Incă 1 str": Colors.dark.primary,
-  "Finalul Rărit": Colors.dark.secondary,
+// Get cue color mapping from settings
+const getCueColor = (cueText: string, settings: any) => {
+  const tile = settings.tiles.find((t: any) => t.text === cueText);
+  return tile ? tile.color : "#fff";
 };
 
 export default function BandScreen() {
   const { currentSession, currentCue, leaveSession } = useSession();
+  const { settings } = useSettings();
   const [visibleCue, setVisibleCue] = useState(currentCue);
 
   useEffect(() => {
@@ -91,6 +91,12 @@ export default function BandScreen() {
               </View>
             </View>
             <View style={styles.headerButtons}>
+              <TouchableOpacity 
+                style={styles.settingsButton} 
+                onPress={() => router.push('/settings')}
+              >
+                <Text style={[styles.settingsButtonText, { color: "#fff" }]}>⚙️</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.menuButton} onPress={handleLeaveSession}>
                 <Text style={[styles.menuButtonText, { color: "#fff" }]}>⋯</Text>
               </TouchableOpacity>
@@ -98,7 +104,16 @@ export default function BandScreen() {
           </View>
         </View>
         <View style={styles.cueContainer}>
-          <Text style={[styles.cueText, { color: visibleCue && BAND_CUE_COLORS[visibleCue.text] ? BAND_CUE_COLORS[visibleCue.text] : "#fff" }]}>{visibleCue?.text || ""}</Text>
+          <Text style={[
+            styles.cueText, 
+            { 
+              color: visibleCue ? getCueColor(visibleCue.text, settings) : "#fff",
+              fontSize: visibleCue ? (visibleCue.text === "—" ? 48 : settings.globalTextSize * 2.4) : 48,
+              fontWeight: visibleCue ? (visibleCue.text === "—" ? "900" : settings.globalFontWeight) : "bold"
+            }
+          ]}>
+            {visibleCue?.text || ""}
+          </Text>
         </View>
       </SafeAreaView>
     </View>
@@ -149,6 +164,14 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
+  },
+  settingsButton: {
+    padding: 4,
+  },
+  settingsButtonText: {
+    fontSize: 18,
+    color: Colors.light.background,
   },
   menuButton: {
     padding: 4,

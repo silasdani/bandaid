@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import { Alert, Animated, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import Colors from "../constants/Colors";
 import { useSession } from "../context/SessionContext";
+import { useSettings } from "../context/SettingsContext";
 import { firebaseService } from "../services/firebase";
 
 // No longer need CUE_COLORS or type
@@ -10,6 +11,7 @@ import { firebaseService } from "../services/firebase";
 export default function LeadScreen() {
   // All hooks at the top
   const { currentSession, sendCue, leaveSession, clearCue } = useSession();
+  const { getActiveTiles } = useSettings();
   const [sendingCue, setSendingCue] = useState<string | null>(null);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [headerColor, setHeaderColor] = useState<string>("#000");
@@ -17,13 +19,8 @@ export default function LeadScreen() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // Remove color from predefinedCues and use getCueColor for text color
-  const predefinedCues: { text: string; color: string; duration: number }[] = [
-    { text: "Pauză Instrumental", color: Colors.light.warning, duration: 6000 },
-    { text: "X2 Ref", color: Colors.light.error, duration: 6000 },
-    { text: "Incă 1 str", color: Colors.dark.primary, duration: 6000 },
-    { text: "Finalul Rărit", color: Colors.dark.secondary, duration: 6000 },
-  ];
+  // Get tiles from settings context
+  const activeTiles = getActiveTiles();
 
   const handleSendCue = async (cue: { text: string; color: string }, duration: number) => {
     if (sendingCue) return; // Prevent multiple sends
@@ -106,13 +103,13 @@ export default function LeadScreen() {
     );
   }
 
-  // Map predefinedCues to Cue objects with timestamp for type safety
+  // Map active tiles to Cue objects with timestamp for type safety
   const now = Date.now();
-  const mappedCues: { text: string; color: string; duration: number; timestamp: number }[] = predefinedCues.map((cue, i) => ({
-    text: cue.text,
-    color: cue.color,
+  const mappedCues: { text: string; color: string; duration: number; timestamp: number }[] = activeTiles.map((tile, i) => ({
+    text: tile.text,
+    color: tile.color,
     timestamp: now + i,
-    duration: cue.duration,
+    duration: tile.duration,
   }));
   const dashCue: { text: string; color: string; duration: number; timestamp: number } = { text: "—", color: "#fff", timestamp: now - 1, duration: 0 };
   const cuesWithDash: { text: string; color: string; duration: number; timestamp: number }[] = [dashCue, ...mappedCues];
@@ -150,6 +147,12 @@ export default function LeadScreen() {
               </View>
             </View>
             <View style={styles.headerButtons}>
+              <TouchableOpacity 
+                style={styles.settingsButton} 
+                onPress={() => router.push('/settings')}
+              >
+                <Text style={[styles.settingsButtonText, { color: "#fff" }]}>⚙️</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.menuButton} onPress={handleLeaveSession}>
                 <Text style={[styles.menuButtonText, { color: "#fff" }]}>⋯</Text>
               </TouchableOpacity>
@@ -167,7 +170,7 @@ export default function LeadScreen() {
                 const cue = cuesToShow[cueIdx];
                 return (
                   <View key={colIdx} style={{ width: `${100 / numCols - 5}%`, height: "20%", margin: 10 }}>
-                    {cue ? (
+                                            {cue ? (
                       <Animated.View style={{ flex: 1, opacity: sendingCue === cue.text ? 0.6 : fadeAnim }}>
                         <TouchableOpacity
                           style={[
@@ -184,8 +187,9 @@ export default function LeadScreen() {
                               styles.cueGridText,
                               {
                                 color: cue.color || "#fff",
+                                fontSize: cue.text === "—" ? 36 : activeTiles.find(t => t.text === cue.text)?.fontSize || 20,
+                                fontWeight: cue.text === "—" ? "900" : activeTiles.find(t => t.text === cue.text)?.fontWeight || "bold",
                               },
-                              cue.text === "—" ? { color: "#fff", fontSize: 36, fontWeight: "900" } : {},
                             ]}
                           >
                             {cue.text}
@@ -257,6 +261,14 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
+  },
+  settingsButton: {
+    padding: 4,
+  },
+  settingsButtonText: {
+    fontSize: 18,
+    color: Colors.light.background,
   },
   menuButton: {
     padding: 4,

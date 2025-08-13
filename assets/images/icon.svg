@@ -1,12 +1,51 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="120" fill="#2563eb" />
-  <g>
-    <circle cx="180" cy="370" r="50" fill="#fff" />
-    <rect x="220" y="120" width="40" height="200" rx="20" fill="#fff" />
-    <ellipse cx="240" cy="140" rx="60" ry="30" fill="#fff" />
-    <text x="270" y="400" font-family="Arial, Helvetica, sans-serif" font-size="64" fill="#fff"
-      font-weight="bold">Band</text>
-    <text x="270" y="460" font-family="Arial, Helvetica, sans-serif" font-size="48" fill="#fff">Cue</text>
-  </g>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Guitar Body -->
+  <ellipse cx="512" cy="600" rx="200" ry="120" fill="#8B4513" stroke="#654321" stroke-width="8"/>
+  
+  <!-- Guitar Neck -->
+  <rect x="400" y="200" width="80" height="400" fill="#D2691E" stroke="#8B4513" stroke-width="4"/>
+  
+  <!-- Guitar Head -->
+  <rect x="380" y="120" width="120" height="80" rx="10" fill="#D2691E" stroke="#8B4513" stroke-width="4"/>
+  
+  <!-- Tuning Pegs -->
+  <circle cx="400" cy="140" r="8" fill="#654321"/>
+  <circle cx="420" cy="140" r="8" fill="#654321"/>
+  <circle cx="440" cy="140" r="8" fill="#654321"/>
+  <circle cx="460" cy="140" r="8" fill="#654321"/>
+  <circle cx="400" cy="180" r="8" fill="#654321"/>
+  <circle cx="420" cy="180" r="8" fill="#654321"/>
+  
+  <!-- Sound Hole -->
+  <circle cx="512" cy="600" r="40" fill="#000000"/>
+  <circle cx="512" cy="600" r="35" fill="#8B4513"/>
+  
+  <!-- Bridge -->
+  <rect x="492" y="680" width="40" height="8" fill="#654321"/>
+  
+  <!-- Strings -->
+  <line x1="400" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  <line x1="420" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  <line x1="440" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  <line x1="460" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  <line x1="400" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  <line x1="420" y1="200" x2="492" y2="680" stroke="#C0C0C0" stroke-width="2"/>
+  
+  <!-- Fret Lines -->
+  <line x1="400" y1="280" x2="480" y2="280" stroke="#654321" stroke-width="3"/>
+  <line x1="400" y1="360" x2="480" y2="360" stroke="#654321" stroke-width="3"/>
+  <line x1="400" y1="440" x2="480" y2="440" stroke="#654321" stroke-width="3"/>
+  <line x1="400" y1="520" x2="480" y2="520" stroke="#654321" stroke-width="3"/>
+  
+  <!-- Band Aid Cross -->
+  <rect x="700" y="400" width="200" height="80" rx="20" fill="#FFFFFF" stroke="#FF6B6B" stroke-width="6"/>
+  <rect x="750" y="350" width="20" height="180" fill="#FF6B6B"/>
+  <rect x="700" y="400" width="200" height="20" fill="#FF6B6B"/>
+  
+  <!-- Musical Notes -->
+  <circle cx="750" cy="300" r="15" fill="#FF6B6B"/>
+  <path d="M750 285 L750 250 L780 250 L780 285" stroke="#FF6B6B" stroke-width="4" fill="none"/>
+  
+  <circle cx="800" cy="320" r="15" fill="#FF6B6B"/>
+  <path d="M800 305 L800 270 L830 270 L830 305" stroke="#FF6B6B" stroke-width="4" fill="none"/>
 </svg> 
