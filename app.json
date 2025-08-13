@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "BandAid",
-    "slug": "bandaid",
+    "slug": "band-cue",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
@@ -13,16 +13,15 @@
       "bundleIdentifier": "ro.albini.bandaid",
       "buildNumber": "1.0.0"
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "package": "ro.albini.bandaid",
-        "versionCode": 1
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "ro.albini.bandaid"
+      "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/images/adaptive-icon.png",
+      "backgroundColor": "#ffffff"
     },
+    "edgeToEdgeEnabled": true,
+    "package": "ro.albini.bandaid",
+    "versionCode": 1
+  },
     "web": {
       "bundler": "metro",
       "output": "static",
