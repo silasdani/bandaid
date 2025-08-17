@@ -10,8 +10,9 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ro.albini.bandaid",
-      "buildNumber": "1.0.0"
+      "bundleIdentifier": "ro.albini.bandcue",
+      "buildNumber": "1.0.0",
+      "icon": "./assets/images/icon.png"
     },
       "android": {
     "adaptiveIcon": {
@@ -19,7 +20,7 @@
       "backgroundColor": "#ffffff"
     },
     "edgeToEdgeEnabled": true,
-    "package": "ro.albini.bandaid",
+          "package": "ro.albini.bandcue",
     "versionCode": 1
   },
     "web": {
