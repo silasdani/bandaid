@@ -1,37 +1,21 @@
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-    Alert,
-    Dimensions,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from "react-native";
+import { Alert, Dimensions, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../constants/Colors";
+import { useLanguage } from "../context/LanguageContext";
 import { useSession } from "../context/SessionContext";
-import { useSettings } from "../context/SettingsContext";
 
 const { width, height } = Dimensions.get("window");
 
-// Get cue color mapping from settings
-const getCueColor = (cueText: string, settings: any) => {
-  const tile = settings.tiles.find((t: any) => t.text === cueText);
-  return tile ? tile.color : "#fff";
-};
-
 export default function BandScreen() {
   const { currentSession, currentCue, leaveSession } = useSession();
-  const { settings } = useSettings();
+  const { t } = useLanguage();
   const [visibleCue, setVisibleCue] = useState(currentCue);
 
   useEffect(() => {
     if (currentCue && currentCue.text) {
       setVisibleCue(currentCue);
-      const duration = currentCue.duration ?? 6000;
+      const duration = currentCue.duration ?? 30000;
       const timer = setTimeout(() => {
         setVisibleCue(null);
       }, duration);
@@ -44,15 +28,15 @@ export default function BandScreen() {
   // Redirect to start if session is closed
   useEffect(() => {
     if (currentSession && currentSession.active === false) {
-      router.replace('/start');
+      router.replace("/start");
     }
   }, [currentSession]);
 
   const handleLeaveSession = async () => {
-    Alert.alert("Gestionare Sesiune", "Ce dorești să faci?", [
-      { text: "Anulează", style: "cancel" },
+    Alert.alert(t("lead.sessionManagement"), "Ce dorești să faci?", [
+      { text: t("lead.cancel"), style: "cancel" },
       {
-        text: "Părăsește sesiunea",
+        text: t("lead.leaveSession"),
         onPress: async () => {
           await leaveSession();
           router.replace("/start");
@@ -63,12 +47,12 @@ export default function BandScreen() {
 
   if (!currentSession) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#000" }}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+      <View style={styles.errorScreenContainer}>
+        <SafeAreaView style={styles.errorScreenContainer}>
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Nu există o sesiune activă</Text>
+            <Text style={styles.errorText}>{t("lead.noActiveSession")}</Text>
             <TouchableOpacity style={styles.backButton} onPress={() => router.replace("/start")}>
-              <Text style={styles.backButtonText}>Înapoi la Start</Text>
+              <Text style={styles.backButtonText}>{t("start.backToStart")}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -77,41 +61,37 @@ export default function BandScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
+    <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#333" />
         {/* Compact Header */}
-        <View style={[styles.header, { backgroundColor: "#000", borderBottomColor: "#222", borderBottomWidth: 1 }]}> 
+        <View style={[styles.header, styles.headerBorder]}>
           <View style={styles.headerContent}>
             <View style={styles.sessionInfo}>
-              <Text style={[styles.sessionCode, { color: "#fff" }]}>{currentSession.id}</Text>
+              <Text style={styles.sessionCode}>{currentSession.id}</Text>
               <View style={styles.statusContainer}>
                 <View style={[styles.statusIndicator, { backgroundColor: currentSession.active ? Colors.light.success : Colors.light.error }]} />
-                <Text style={[styles.statusText, { color: "#fff" }]}>{currentSession.active ? "Activă" : "Închisă"}</Text>
+                <Text style={styles.statusText}>{currentSession.active ? t("lead.status.active") : t("lead.status.inactive")}</Text>
               </View>
             </View>
             <View style={styles.headerButtons}>
-              <TouchableOpacity 
-                style={styles.settingsButton} 
-                onPress={() => router.push('/settings')}
-              >
-                <Text style={[styles.settingsButtonText, { color: "#fff" }]}>⚙️</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={styles.menuButton} onPress={handleLeaveSession}>
-                <Text style={[styles.menuButtonText, { color: "#fff" }]}>⋯</Text>
+                <Text style={styles.menuButtonText}>⋯</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
         <View style={styles.cueContainer}>
-          <Text style={[
-            styles.cueText, 
-            { 
-              color: visibleCue ? getCueColor(visibleCue.text, settings) : "#fff",
-              fontSize: visibleCue ? (visibleCue.text === "—" ? 48 : settings.globalTextSize * 2.4) : 48,
-              fontWeight: visibleCue ? (visibleCue.text === "—" ? "900" : settings.globalFontWeight) : "bold"
-            }
-          ]}>
+          <Text
+            style={[
+              styles.cueText,
+              {
+                color: visibleCue?.color || "#fff",
+                fontSize: visibleCue?.fontSize ? visibleCue.fontSize * 2.4 : 48,
+                fontWeight: visibleCue?.fontWeight || "bold",
+              },
+            ]}
+          >
             {visibleCue?.text || ""}
           </Text>
         </View>
@@ -121,15 +101,28 @@ export default function BandScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Main container styles
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#333",
   },
+
+  // Error screen styles
+  errorScreenContainer: {
+    flex: 1,
+    backgroundColor: "#333",
+  },
+
+  // Header styles
   header: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: "#333",
     paddingTop: Platform.OS === "ios" ? 0 : StatusBar.currentHeight || 0,
     paddingBottom: 12,
     paddingHorizontal: 16,
+  },
+  headerBorder: {
+    borderBottomColor: "#222",
+    borderBottomWidth: 1,
   },
   headerContent: {
     flexDirection: "row",
@@ -143,7 +136,7 @@ const styles = StyleSheet.create({
   sessionCode: {
     fontSize: 18,
     fontWeight: "700",
-    color: Colors.light.background,
+    color: "#fff",
     marginRight: 12,
   },
   statusContainer: {
@@ -158,7 +151,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    color: Colors.light.background,
+    color: "#fff",
     fontWeight: "500",
   },
   headerButtons: {
@@ -166,20 +159,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  settingsButton: {
-    padding: 4,
-  },
-  settingsButtonText: {
-    fontSize: 18,
-    color: Colors.light.background,
-  },
   menuButton: {
     padding: 4,
   },
   menuButtonText: {
     fontSize: 18,
-    color: Colors.light.background,
+    color: "#fff",
   },
+
+  // Cue display styles
   cueContainer: {
     flex: 1,
     justifyContent: "center",
@@ -195,6 +183,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 70,
   },
+
+  // Error state styles
   errorContainer: {
     flex: 1,
     justifyContent: "center",

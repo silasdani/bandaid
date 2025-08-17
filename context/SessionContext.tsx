@@ -5,6 +5,9 @@ import { firebaseService, LeadAction } from "../services/firebase";
 export interface Cue {
   text: string;
   timestamp: number;
+  color?: string;
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold' | '900';
   duration?: number;
 }
 
@@ -22,6 +25,17 @@ export interface Session {
   cue?: Cue;
   members?: { [userId: string]: SessionMember };
   memberCount?: number;
+  sessionSettings?: {
+    tiles: Array<{
+      id: string;
+      text: string;
+      color: string;
+      duration: number;
+      fontSize: number;
+      fontWeight: 'normal' | 'bold' | '900';
+      isActive: boolean;
+    }>;
+  };
 }
 
 interface SessionContextType {
@@ -40,6 +54,10 @@ interface SessionContextType {
   role: "lead" | "band" | null;
   sessionId: string | null;
   isSessionLoaded: boolean;
+  updateSessionTile: (id: string, updates: any) => Promise<void>;
+  addSessionTile: (tile: any) => Promise<void>;
+  removeSessionTile: (id: string) => Promise<void>;
+  getSessionActiveTiles: () => any[];
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -59,6 +77,82 @@ interface SessionProviderProps {
 const USER_ID_KEY = "bandcue_user_id";
 const SESSION_ID_KEY = "bandcue_session_id";
 const ROLE_KEY = "bandcue_role";
+
+// Default tiles configuration for new sessions
+const defaultSessionTiles = [
+  {
+    id: '1',
+    text: '—',
+    color: '#FFFFFF',
+    duration: 0,
+    fontSize: 36,
+    fontWeight: '900' as const,
+    isActive: true,
+  },
+  {
+    id: '2',
+    text: 'Pauză Instrumental',
+    color: '#FFA500',
+    duration: 15000,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: true,
+  },
+  {
+    id: '3',
+    text: 'X2 Ref',
+    color: '#FF0000',
+    duration: 15000,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: true,
+  },
+  {
+    id: '4',
+    text: 'Încă 1 str',
+    color: '#007AFF',
+    duration: 15000,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: true,
+  },
+  {
+    id: '5',
+    text: 'Finalul Rărit',
+    color: '#34C759',
+    duration: 15000,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: true,
+  },
+  {
+    id: '6',
+    text: 'Fara Pauza',
+    color: '#FF3B30',
+    duration: 15000,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: true,
+  },
+  {
+    id: '7',
+    text: '',
+    color: '#FFFFFF',
+    duration: 0,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: false,
+  },
+  {
+    id: '8',
+    text: '',
+    color: '#FFFFFF',
+    duration: 0,
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    isActive: false,
+  },
+];
 
 export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -209,12 +303,20 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
       setSessionId(sessionId);
       await AsyncStorage.setItem(SESSION_ID_KEY, sessionId);
       await AsyncStorage.setItem(ROLE_KEY, "lead");
+      
       const session: Session = {
         id: sessionId,
         active: true,
         createdAt: Date.now(),
         roleLead: id,
+        sessionSettings: {
+          tiles: defaultSessionTiles,
+        },
       };
+      
+      // Save session settings to Firebase
+      await firebaseService.updateSessionSettings(sessionId, session.sessionSettings);
+      
       setCurrentSession(session);
       setIsConnected(true);
       setRole("lead");
@@ -343,6 +445,69 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     setSessionId(null);
   };
 
+  // Session settings management functions
+  const updateSessionTile = async (id: string, updates: any) => {
+    if (!currentSession) return;
+    
+    const updatedSettings = {
+      ...currentSession.sessionSettings,
+      tiles: currentSession.sessionSettings?.tiles.map(tile =>
+        tile.id === id ? { ...tile, ...updates } : tile
+      ) || []
+    };
+
+    const updatedSession = {
+      ...currentSession,
+      sessionSettings: updatedSettings
+    };
+
+    setCurrentSession(updatedSession);
+    await firebaseService.updateSessionSettings(currentSession.id, updatedSettings);
+  };
+
+  const addSessionTile = async (tile: any) => {
+    if (!currentSession) return;
+    
+    const newTile = {
+      ...tile,
+      id: Date.now().toString(),
+    };
+
+    const updatedSettings = {
+      ...currentSession.sessionSettings,
+      tiles: [...(currentSession.sessionSettings?.tiles || []), newTile]
+    };
+
+    const updatedSession = {
+      ...currentSession,
+      sessionSettings: updatedSettings
+    };
+
+    setCurrentSession(updatedSession);
+    await firebaseService.updateSessionSettings(currentSession.id, updatedSettings);
+  };
+
+  const removeSessionTile = async (id: string) => {
+    if (!currentSession) return;
+    
+    const updatedSettings = {
+      ...currentSession.sessionSettings,
+      tiles: currentSession.sessionSettings?.tiles.filter(tile => tile.id !== id) || []
+    };
+
+    const updatedSession = {
+      ...currentSession,
+      sessionSettings: updatedSettings
+    };
+
+    setCurrentSession(updatedSession);
+    await firebaseService.updateSessionSettings(currentSession.id, updatedSettings);
+  };
+
+  const getSessionActiveTiles = () => {
+    return currentSession?.sessionSettings?.tiles.filter(tile => tile.isActive) || [];
+  };
+
   const value: SessionContextType = {
     currentSession,
     currentCue,
@@ -359,6 +524,10 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     role,
     sessionId,
     isSessionLoaded,
+    updateSessionTile,
+    addSessionTile,
+    removeSessionTile,
+    getSessionActiveTiles,
   };
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

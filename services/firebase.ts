@@ -314,4 +314,15 @@ export const firebaseService = {
       return null;
     }
   },
+
+  updateSessionSettings: async (sessionId: string, settings: any): Promise<void> => {
+    try {
+      const sessionRef = ref(database, `sessions/${sessionId}/sessionSettings`);
+      await set(sessionRef, settings);
+      console.log("Session settings updated in Firebase:", sessionId);
+    } catch (error) {
+      console.error("Error updating session settings:", error);
+      throw error;
+    }
+  },
 };

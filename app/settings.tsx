@@ -2,22 +2,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import Colors from "../constants/Colors";
-import { TileConfig, useSettings } from "../context/SettingsContext";
+import { useLanguage } from "../context/LanguageContext";
+import { useSession } from "../context/SessionContext";
+import { TileConfig } from "../context/SettingsContext";
 
 export default function SettingsScreen() {
-  const { settings, updateTile, addTile, removeTile, updateGlobalTextSize, updateGlobalFontWeight, updateTheme, resetToDefaults } = useSettings();
+  const { currentSession, updateSessionTile, addSessionTile, removeSessionTile } = useSession();
+  const { t } = useLanguage();
   const [editingTile, setEditingTile] = useState<TileConfig | null>(null);
   const [showAddTile, setShowAddTile] = useState(false);
 
@@ -31,7 +35,7 @@ export default function SettingsScreen() {
 
   const handleSaveTile = () => {
     if (editingTile) {
-      updateTile(editingTile.id, editingTile);
+      updateSessionTile(editingTile.id, editingTile);
       setEditingTile(null);
     }
   };
@@ -44,33 +48,37 @@ export default function SettingsScreen() {
     const newTile: Omit<TileConfig, 'id'> = {
       text: 'New Tile',
       color: '#FFFFFF',
-      duration: 6000,
+      duration: 15000,
       fontSize: 20,
       fontWeight: 'bold',
       isActive: true,
     };
-    addTile(newTile);
+    addSessionTile(newTile);
     setShowAddTile(false);
   };
 
   const handleRemoveTile = (id: string) => {
     Alert.alert(
-      "Remove Tile",
-      "Are you sure you want to remove this tile?",
+      t('settings.removeTile'),
+      t('settings.removeTileConfirm'),
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Remove", style: "destructive", onPress: () => removeTile(id) },
+        { text: t('settings.cancel'), style: "cancel" },
+        { text: t('settings.removeTile'), style: "destructive", onPress: () => removeSessionTile(id) },
       ]
     );
   };
 
+  // Reset to defaults is now handled by session settings
   const handleResetToDefaults = () => {
+    // This will be implemented to reset session settings to defaults
     Alert.alert(
-      "Reset to Defaults",
-      "Are you sure you want to reset all settings to default values? This cannot be undone.",
+      t('settings.resetToDefaults'),
+      'Reset session settings to defaults?',
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Reset", style: "destructive", onPress: resetToDefaults },
+        { text: t('settings.cancel'), style: "cancel" },
+        { text: 'Reset', style: "destructive", onPress: () => {
+          // TODO: Implement reset to session defaults
+        }},
       ]
     );
   };
@@ -82,10 +90,57 @@ export default function SettingsScreen() {
 
   const fontWeights = ['normal', 'bold', '900'] as const;
 
+  // Dynamic styles for tile properties
+  const getTilePreviewButtonStyle = (color: string) => [
+    styles.tilePreviewButton,
+    { borderColor: color }
+  ];
+
+  const getTilePreviewTextStyle = (tile: TileConfig) => [
+    styles.tilePreviewText,
+    { color: tile.color, fontSize: tile.fontSize, fontWeight: tile.fontWeight }
+  ];
+
+  const getTileStatusStyle = (isActive: boolean) => [
+    styles.tileStatus,
+    { color: isActive ? Colors.light.success : Colors.light.error }
+  ];
+
+  const getSliderFillStyle = (textSize: number) => [
+    styles.sliderFill,
+    { width: `${((textSize - 12) / (48 - 12)) * 100}%` as any }
+  ];
+
+  const getColorOptionStyle = (color: string, isSelected: boolean) => [
+    styles.colorOption,
+    { backgroundColor: color },
+    isSelected && styles.selectedColor
+  ];
+
+  const getWeightOptionStyle = (weight: string, isSelected: boolean) => [
+    styles.weightOption,
+    isSelected && styles.selectedWeight
+  ];
+
+  const getWeightTextStyle = (isSelected: boolean) => [
+    styles.weightText,
+    isSelected && styles.selectedWeightText
+  ];
+
+  const getThemeOptionStyle = (theme: string, isSelected: boolean) => [
+    styles.themeOption,
+    isSelected && styles.selectedTheme
+  ];
+
+  const getThemeTextStyle = (isSelected: boolean) => [
+    styles.themeText,
+    isSelected && styles.selectedThemeText
+  ];
+
   const renderTileEditor = (tile: TileConfig) => (
     <View key={tile.id} style={styles.tileEditor}>
       <View style={styles.tileEditorHeader}>
-        <Text style={styles.tileEditorTitle}>Edit Tile</Text>
+        <Text style={styles.tileEditorTitle}>{t('settings.editTile')}</Text>
         <View style={styles.tileEditorActions}>
           <TouchableOpacity onPress={handleSaveTile} style={styles.saveButton}>
             <Ionicons name="checkmark" size={20} color="#fff" />
@@ -97,7 +152,7 @@ export default function SettingsScreen() {
       </View>
       
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Text</Text>
+        <Text style={styles.inputLabel}>{t('settings.text')}</Text>
         <TextInput
           style={styles.textInput}
           value={tile.text}
@@ -108,16 +163,12 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Color</Text>
+        <Text style={styles.inputLabel}>{t('settings.color')}</Text>
         <View style={styles.colorPicker}>
           {predefinedColors.map((color) => (
             <TouchableOpacity
               key={color}
-              style={[
-                styles.colorOption,
-                { backgroundColor: color },
-                tile.color === color && styles.selectedColor
-              ]}
+              style={getColorOptionStyle(color, tile.color === color)}
               onPress={() => setEditingTile({ ...tile, color })}
             />
           ))}
@@ -125,7 +176,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Duration (ms)</Text>
+        <Text style={styles.inputLabel}>{t('settings.duration')}</Text>
         <TextInput
           style={styles.textInput}
           value={tile.duration.toString()}
@@ -137,7 +188,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Font Size</Text>
+        <Text style={styles.inputLabel}>{t('settings.fontSize')}</Text>
         <TextInput
           style={styles.textInput}
           value={tile.fontSize.toString()}
@@ -149,22 +200,16 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Font Weight</Text>
+        <Text style={styles.inputLabel}>{t('settings.fontWeight')}</Text>
         <View style={styles.weightPicker}>
           {fontWeights.map((weight) => (
             <TouchableOpacity
               key={weight}
-              style={[
-                styles.weightOption,
-                tile.fontWeight === weight && styles.selectedWeight
-              ]}
+              style={getWeightOptionStyle(weight, tile.fontWeight === weight)}
               onPress={() => setEditingTile({ ...tile, fontWeight: weight })}
             >
-              <Text style={[
-                styles.weightText,
-                tile.fontWeight === weight && styles.selectedWeightText
-              ]}>
-                {weight}
+              <Text style={getWeightTextStyle(tile.fontWeight === weight)}>
+                {t(`settings.weights.${weight}`)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -172,7 +217,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Active</Text>
+        <Text style={styles.inputLabel}>{t('settings.active')}</Text>
         <Switch
           value={tile.isActive}
           onValueChange={(isActive) => setEditingTile({ ...tile, isActive })}
@@ -186,25 +231,22 @@ export default function SettingsScreen() {
   const renderTile = (tile: TileConfig) => (
     <View key={tile.id} style={styles.tileItem}>
       <View style={styles.tilePreview}>
-        <View style={[styles.tilePreviewButton, { borderColor: tile.color }]}>
-          <Text style={[
-            styles.tilePreviewText,
-            { color: tile.color, fontSize: tile.fontSize, fontWeight: tile.fontWeight }
-          ]}>
-            {tile.text || 'Empty'}
+        <View style={getTilePreviewButtonStyle(tile.color)}>
+          <Text style={getTilePreviewTextStyle(tile)}>
+            {tile.text || t('settings.emptyTile')}
           </Text>
         </View>
       </View>
       
       <View style={styles.tileInfo}>
         <Text style={styles.tileText} numberOfLines={1}>
-          {tile.text || 'Empty Tile'}
+          {tile.text || t('settings.emptyTile')}
         </Text>
         <Text style={styles.tileDetails}>
-          {tile.duration > 0 ? `${tile.duration}ms` : 'No duration'} • {tile.fontSize}px • {tile.fontWeight}
+          {tile.duration > 0 ? `${tile.duration}${t('settings.ms')}` : t('settings.noDuration')} • {tile.fontSize}{t('settings.px')} • {t(`settings.weights.${tile.fontWeight}`)}
         </Text>
-        <Text style={[styles.tileStatus, { color: tile.isActive ? Colors.light.success : Colors.light.error }]}>
-          {tile.isActive ? 'Active' : 'Inactive'}
+        <Text style={getTileStatusStyle(tile.isActive)}>
+          {tile.isActive ? t('settings.active') : t('settings.inactive')}
         </Text>
       </View>
 
@@ -228,96 +270,35 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
+        <StatusBar barStyle="light-content" backgroundColor="#333" />
         
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={styles.headerTitle}>{t('settings.title')}</Text>
           <View style={styles.headerRight} />
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Global Settings */}
+          {/* Language Switcher */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Global Settings</Text>
-            
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Global Text Size</Text>
-              <View style={styles.sliderContainer}>
-                <Text style={styles.sliderValue}>{settings.globalTextSize}px</Text>
-                <View style={styles.sliderTrack}>
-                  <View 
-                    style={[
-                      styles.sliderFill, 
-                      { width: `${((settings.globalTextSize - 12) / (48 - 12)) * 100}%` }
-                    ]} 
-                  />
-                  <TouchableOpacity
-                    style={styles.sliderThumb}
-                    onPress={() => updateGlobalTextSize(Math.max(12, settings.globalTextSize - 2))}
-                  />
-                  <TouchableOpacity
-                    style={[styles.sliderThumb, { right: 0 }]}
-                    onPress={() => updateGlobalTextSize(Math.min(48, settings.globalTextSize + 2))}
-                  />
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Global Font Weight</Text>
-              <View style={styles.weightPicker}>
-                {fontWeights.map((weight) => (
-                  <TouchableOpacity
-                    key={weight}
-                    style={[
-                      styles.weightOption,
-                      settings.globalFontWeight === weight && styles.selectedWeight
-                    ]}
-                    onPress={() => updateGlobalFontWeight(weight)}
-                  >
-                    <Text style={[
-                      styles.weightText,
-                      settings.globalFontWeight === weight && styles.selectedWeightText
-                    ]}>
-                      {weight}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.settingItem}>
-              <Text style={styles.settingLabel}>Theme</Text>
-              <View style={styles.themePicker}>
-                {(['light', 'dark', 'auto'] as const).map((theme) => (
-                  <TouchableOpacity
-                    key={theme}
-                    style={[
-                      styles.themeOption,
-                      settings.theme === theme && styles.selectedTheme
-                    ]}
-                    onPress={() => updateTheme(theme)}
-                  >
-                    <Text style={[
-                      styles.themeText,
-                      settings.theme === theme && styles.selectedThemeText
-                    ]}>
-                      {theme.charAt(0).toUpperCase() + theme.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            <LanguageSwitcher />
+          </View>
+          
+          {/* Session Settings Info */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Session Settings</Text>
+            <Text style={styles.settingLabel}>
+              These settings are specific to the current session and will not affect other sessions.
+            </Text>
           </View>
 
           {/* Tiles Section */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Tiles Configuration</Text>
+              <Text style={styles.sectionTitle}>{t('settings.tilesConfiguration')}</Text>
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={() => setShowAddTile(true)}
@@ -328,15 +309,15 @@ export default function SettingsScreen() {
 
             {showAddTile && (
               <View style={styles.addTileForm}>
-                <Text style={styles.addTileTitle}>Add New Tile</Text>
+                <Text style={styles.addTileTitle}>{t('settings.addNewTile')}</Text>
                 <TouchableOpacity style={styles.addTileButton} onPress={handleAddTile}>
-                  <Text style={styles.addTileButtonText}>Create Tile</Text>
+                  <Text style={styles.addTileButtonText}>{t('settings.createTile')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.cancelAddButton} 
                   onPress={() => setShowAddTile(false)}
                 >
-                  <Text style={styles.cancelAddButtonText}>Cancel</Text>
+                  <Text style={styles.cancelAddButtonText}>{t('settings.cancel')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -344,7 +325,7 @@ export default function SettingsScreen() {
             {editingTile ? (
               renderTileEditor(editingTile)
             ) : (
-              settings.tiles.map(renderTile)
+              currentSession?.sessionSettings?.tiles?.map(renderTile) || []
             )}
           </View>
 
@@ -352,7 +333,7 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <TouchableOpacity style={styles.resetButton} onPress={handleResetToDefaults}>
               <Ionicons name="refresh" size={20} color="#fff" />
-              <Text style={styles.resetButtonText}>Reset to Defaults</Text>
+              <Text style={styles.resetButtonText}>{t('settings.resetToDefaults')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -364,7 +345,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#333",
   },
   header: {
     flexDirection: "row",
@@ -441,6 +422,9 @@ const styles = StyleSheet.create({
     height: 16,
     backgroundColor: Colors.light.primary,
     borderRadius: 8,
+  },
+  sliderThumbRight: {
+    right: 0,
   },
   weightPicker: {
     flexDirection: "row",
