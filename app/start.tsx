@@ -24,7 +24,7 @@ export default function StartScreen() {
       const newSessionId = await createSession();
       setSessionId(newSessionId);
     } catch (error) {
-      Alert.alert("Eroare", t('start.errors.createSessionFailed'));
+      Alert.alert("Eroare", t("start.errors.createSessionFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +32,7 @@ export default function StartScreen() {
 
   const handleJoinSession = async () => {
     if (!sessionIdInput.trim()) {
-      Alert.alert("Eroare", t('start.errors.sessionCodeRequired'));
+      Alert.alert("Eroare", t("start.errors.sessionCodeRequired"));
       return;
     }
     setIsLoading(true);
@@ -43,10 +43,10 @@ export default function StartScreen() {
         setSessionId(sessionIdInput.trim().toUpperCase());
         router.push("/band");
       } else {
-        Alert.alert("Eroare", t('start.errors.invalidSessionCode'));
+        Alert.alert("Eroare", t("start.errors.invalidSessionCode"));
       }
     } catch (error) {
-      Alert.alert("Eroare", t('start.errors.connectionFailed'));
+      Alert.alert("Eroare", t("start.errors.connectionFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -72,46 +72,39 @@ export default function StartScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.inner}>
           {/* Language Switcher */}
           <View style={styles.languageContainer}>
             <LanguageSwitcher />
           </View>
-          
+
           {/* Settings Button - Only show for leaders with active session */}
           {role === "lead" && currentSession && (
-            <TouchableOpacity 
-              style={styles.settingsButton} 
-              onPress={() => router.push('/settings')}
-            >
+            <TouchableOpacity style={styles.settingsButton} onPress={() => router.push("/settings")}>
               <Text style={styles.settingsButtonText}>⚙️</Text>
             </TouchableOpacity>
           )}
-          
+
           {sessionId && localRole && (
             <TouchableOpacity style={styles.continueButton} onPress={handleContinueSession}>
-              <Text style={styles.continueButtonText}>{t('start.continueSession')}</Text>
+              <Text style={styles.continueButtonText}>{t("start.continueSession")}</Text>
             </TouchableOpacity>
           )}
-          <Text style={styles.title}>{t('start.title')}</Text>
+          <Text style={styles.title}>{t("start.title")}</Text>
           <View style={styles.buttonGroup}>
             <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={handleCreateSession} disabled={isLoading}>
-              <Text style={styles.mainButtonText}>{isLoading ? t('start.createSessionLoading') : t('start.createSession')}</Text>
+              <Text style={styles.mainButtonText}>{isLoading ? t("start.createSessionLoading") : t("start.createSession")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.mainButton, isLoading && styles.disabledButton]} onPress={() => setShowJoinInput((v) => !v)} disabled={isLoading}>
-              <Text style={styles.mainButtonText}>{t('start.joinSession')}</Text>
+              <Text style={styles.mainButtonText}>{t("start.joinSession")}</Text>
             </TouchableOpacity>
           </View>
           {showJoinInput && (
             <View style={styles.joinSection}>
               <TextInput
                 style={styles.input}
-                placeholder={t('start.sessionCode')}
+                placeholder={t("start.sessionCode")}
                 placeholderTextColor={Colors.light.gray[400]}
                 value={sessionIdInput}
                 onChangeText={setSessionIdInput}
@@ -121,7 +114,7 @@ export default function StartScreen() {
                 textAlign="center"
               />
               <TouchableOpacity style={[styles.joinButton, isLoading && styles.disabledButton]} onPress={handleJoinSession} disabled={isLoading}>
-                <Text style={styles.joinButtonText}>{isLoading ? t('start.connecting') : t('start.connect')}</Text>
+                <Text style={styles.joinButtonText}>{isLoading ? t("start.connecting") : t("start.connect")}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -140,12 +133,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#333",
     justifyContent: "center",
   },
-  
+
   // ScrollView styles
   scrollViewContent: {
     flexGrow: 1,
   },
-  
+
   // Main content styles
   inner: {
     flex: 1,
@@ -155,7 +148,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     position: "relative",
   },
-  
+
   // Language switcher styles
   languageContainer: {
     position: "absolute",
@@ -164,7 +157,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     width: 200,
   },
-  
+
   // Settings button styles
   settingsButton: {
     position: "absolute",
@@ -177,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#fff",
   },
-  
+
   // Continue session button styles
   continueButton: {
     backgroundColor: Colors.light.secondary,
@@ -194,7 +187,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 1,
   },
-  
+
   // Title styles
   title: {
     fontSize: 40,
@@ -204,7 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     marginTop: 20,
   },
-  
+
   // Button group styles
   buttonGroup: {
     width: "100%",
@@ -227,7 +220,7 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.6,
   },
-  
+
   // Join section styles
   joinSection: {
     width: "100%",
@@ -259,12 +252,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 1,
   },
-  
+
   // Bottom spacer styles
   bottomSpacer: {
     height: 48,
   },
-  
+
   // Logout styles (unused but kept for consistency)
   logoutContainer: {
     alignItems: "center",
