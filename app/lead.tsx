@@ -1,5 +1,6 @@
+import * as Clipboard from "expo-clipboard";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
 import Colors from "../constants/Colors";
 import { useLanguage } from "../context/LanguageContext";
@@ -240,12 +241,29 @@ const CueGrid: React.FC<CueGridProps & { t: (key: string) => string }> = ({ cues
 };
 
 // Component for session header
-const SessionHeader: React.FC<SessionHeaderProps & { t: (key: string) => string }> = ({ session, role, headerColor, onSettingsPress, onLeaveSession, t }) => (
+const SessionHeader: React.FC<SessionHeaderProps & { t: (key: string) => string }> = ({ session, role, headerColor, onSettingsPress, onLeaveSession, t }) => {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(id);
+  }, [copied]);
+
+  const handleCopySessionKey = async () => {
+    await Clipboard.setStringAsync(session.id);
+    setCopied(true);
+  };
+
+  return (
   <View style={getHeaderContainerStyle(headerColor)}>
     <View style={getHeaderStyle(headerColor)}>
       <View style={styles.headerContent}>
         <View style={styles.sessionInfo}>
-          <Text style={getSessionCodeStyle()}>{session.id}</Text>
+          <TouchableOpacity onPress={handleCopySessionKey} activeOpacity={0.7} style={styles.sessionCodeTouchable}>
+            <Text style={getSessionCodeStyle()}>{session.id}</Text>
+            {copied && <Text style={styles.copiedBadge}>{t("lead.sessionCodeCopied")}</Text>}
+          </TouchableOpacity>
           <View style={styles.statusContainer}>
             <View style={getStatusIndicatorStyle(session.active)} />
             <Text style={getStatusTextStyle()}>{session.active ? t("lead.status.active") : t("lead.status.inactive")}</Text>
@@ -265,7 +283,8 @@ const SessionHeader: React.FC<SessionHeaderProps & { t: (key: string) => string 
       </View>
     </View>
   </View>
-);
+  );
+};
 
 // Component for error state
 const ErrorState: React.FC<{ t: (key: string) => string }> = ({ t }) => (
@@ -428,10 +447,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  sessionCodeTouchable: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginRight: 12,
+  },
   sessionCode: {
     fontSize: 18,
     fontWeight: "700",
-    marginRight: 12,
+  },
+  copiedBadge: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#34C759",
   },
   statusContainer: {
     flexDirection: "row",

@@ -27,6 +27,7 @@ export interface Translations {
       active: string;
       inactive: string;
     };
+    sessionCodeCopied: string;
     sending: string;
     sessionManagement: string;
     leaveSession: string;
@@ -87,7 +88,7 @@ export interface Translations {
 export const translations: Record<Language, Translations> = {
   en: {
     start: {
-      title: 'Band Cue',
+      title: 'AID',
       createSession: 'Create Session',
       createSessionLoading: 'Creating...',
       joinSession: 'Join Session',
@@ -109,6 +110,7 @@ export const translations: Record<Language, Translations> = {
         active: 'Active',
         inactive: 'Inactive',
       },
+      sessionCodeCopied: 'Copied!',
       sending: 'Sending...',
       sessionManagement: 'Session Management',
       leaveSession: 'Leave Session',
@@ -163,7 +165,7 @@ export const translations: Record<Language, Translations> = {
   },
   ro: {
     start: {
-      title: 'Band Cue',
+      title: 'AID',
       createSession: 'Creează Sesiune',
       createSessionLoading: 'Se creează...',
       joinSession: 'Conectează-te la Sesiune',
@@ -185,6 +187,7 @@ export const translations: Record<Language, Translations> = {
         active: 'Activă',
         inactive: 'Închisă',
       },
+      sessionCodeCopied: 'Copiat!',
       sending: 'Se trimite...',
       sessionManagement: 'Gestionare Sesiune',
       leaveSession: 'Părăsește sesiunea',
